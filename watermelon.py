@@ -1,7 +1,7 @@
 # 原则：不碰八卦无聊视频，只关注有意义的话题
-from http.cookiejar import Cookie
+# from http.cookiejar import Cookie
 import os
-import undetected_chromedriver.v2 as uc
+import undetected_chromedriver as uc
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -182,7 +182,7 @@ def youtube_check_channel(driver, channel):
     youtube_result = ""
     try:
         #  //*[@id="text"]                             /html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-channel-renderer[1]/div/div[2]/a/div[1]/ytd-channel-name/div/div/yt-formatted-string
-        youtube_result = driver.find_element_by_xpath("/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-channel-renderer[1]/div/div[2]/a/div[1]/ytd-channel-name/div/div/yt-formatted-string").get_attribute('textContent')
+        youtube_result = driver.find_element(By.XPATH,"/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-channel-renderer[1]/div/div[2]/a/div[1]/ytd-channel-name/div/div/yt-formatted-string").get_attribute('textContent')
         # youtube_result = driver.find_element_by_id('text').get_attribute('textContent')
     except Exception as e:
         if "Unable to locate element" in str(e):
@@ -205,7 +205,7 @@ def youtube_check_title(driver, title):
     driver.switch_to.window(window_first)
     youtube_result = ""
     try:
-        youtube_result = driver.find_element_by_xpath('//*[@id="video-title"]/yt-formatted-string').get_attribute('textContent')
+        youtube_result = driver.find_element(By.XPATH,'//*[@id="video-title"]/yt-formatted-string').get_attribute('textContent')
     except Exception as e:
         if "Unable to locate element" in str(e):
             title_existed = False
@@ -234,7 +234,7 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
                 input_box = WebDriverWait(driver,30).until(EC.visibility_of_element_located((By.CLASS_NAME,'input')))
                 input_box.clear()
                 input_box.send_keys(main_key)
-                driver.find_element_by_class_name('search-btn').click()
+                driver.find_element(By.CLASS_NAME,'search-btn').click()
             sleep(2)
         except Exception as e:
             print("input box failed! Try again!")
@@ -244,10 +244,10 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
             else:
                 driver.refresh()
                 sleep(3)
-                input_box = driver.find_element_by_xpath('//*[@id="App"]/div/header/div/div/div[2]/div/div[1]/div[2]/input')
+                input_box = driver.find_element(By.XPATH,'//*[@id="App"]/div/header/div/div/div[2]/div/div[1]/div[2]/input')
                 input_box.clear()
                 input_box.send_keys(main_key)
-                driver.find_element_by_class_name('search-btn').click()
+                driver.find_element(By.CLASS_NAME,'search-btn').click()
         #switch to new page
         if len(page_array) == 1:
             global window_second
@@ -257,14 +257,14 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
         # click 筛选 to filter,  this element cannot be found in headless mode
         try:
             # filter_BTN = WebDriverWait(driver,60).until(EC.visibility_of_element_located((By.CLASS_NAME,'search-show-con__categories')))
-            filter_BTN = driver.find_element_by_xpath('//*[@id="App"]/div/main/div/div/div[1]/div/div[1]/div/div/span/span')
+            filter_BTN = driver.find_element(By.XPATH,'//*[@id="App"]/div/main/div/div/div[1]/div/div[1]/div/div/span/span')
         except Exception as e:
             print("筛选 button click failed! Try again!")
             print(e)
             driver.save_screenshot('filter_BTN_click_error.png')
             driver.refresh()
             sleep(3)
-            filter_BTN = driver.find_element_by_xpath('//*[@id="App"]/div/main/div/div/div[1]/div/div[1]/div/div/span/span')
+            filter_BTN = driver.find_element(By.XPATH,'//*[@id="App"]/div/main/div/div/div[1]/div/div[1]/div/div/span/span')
         # 点击移除通知对话框
         sleep(3)
         ActionChains(driver).move_by_offset(1842,90).click().perform()
@@ -272,11 +272,11 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
         ActionChains(driver).move_by_offset(-1842,-90).perform()
         filter_BTN.click()
         # click 最新 to order by newest
-        driver.find_element_by_xpath("//li[contains(text(),'最新')]").click()
+        driver.find_element(By.XPATH,"//li[contains(text(),'最新')]").click()
         # get search-result DIVs
         # items_DIV = driver.find_elements_by_css_selector('.HorizontalFeedCard__rich__media')
         items_DIV = WebDriverWait(driver,30).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR,'.HorizontalFeedCard__rich__media')))
-        duration_list = driver.find_elements_by_class_name('HorizontalFeedCard__coverContainer')
+        duration_list = driver.find_elements(By.CLASS_NAME,'HorizontalFeedCard__coverContainer')
         div_size = len(items_DIV)
         duration_size = len(duration_list)
         print(f"itemsDIV length {len(items_DIV)}, duration_list length {len(duration_list)}")
@@ -288,10 +288,10 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
             # print(item_DIV.text)
             item_DIV = items_DIV[i]
             # print(f"successfully got the {i}th item of items_DIV: {item_DIV.text}")
-            title = str(item_DIV.find_element_by_tag_name("a").get_attribute("title"))
-            played_info = item_DIV.find_element_by_class_name("HorizontalFeedCard-accessories-bottomInfo__statistics").text
-            url = item_DIV.find_elements_by_tag_name("a")[0].get_attribute("href")
-            channel = item_DIV.find_elements_by_tag_name("a")[1].text
+            title = str(item_DIV.find_element(By.TAG_NAME,"a").get_attribute("title"))
+            played_info = item_DIV.find_element(By.CLASS_NAME,"HorizontalFeedCard-accessories-bottomInfo__statistics").text
+            url = item_DIV.find_elements(By.TAG_NAME,"a")[0].get_attribute("href")
+            channel = item_DIV.find_elements(By.TAG_NAME,"a")[1].text
 
             # choose recent videos  分钟 小时
             if running_mode == "fast":
@@ -332,7 +332,7 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
             if re.search(TITLE_BAN_WORDS,title) or (sub_keys != "" and re.search(sub_keys,title)==None):
                 continue
             # restrict video duration between 1 to 20 minutes
-            duration_text = duration_list[i].find_element_by_tag_name('span').text
+            duration_text = duration_list[i].find_element(By.TAG_NAME,'span').text
             duration_parse_list = duration_text.split(":")
             min_part = int(duration_parse_list[-2])
             if len(duration_parse_list)!=2:
@@ -385,7 +385,7 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
                     # print(f"current window handler is : {driver.current_window_handle}")
 
                     # item_a = driver.find_element_by_class_name('download')
-                    item_a = driver.find_element_by_xpath('/html/body/div[1]/div[3]/div/div[1]/div/div[2]/div[2]/div/a')
+                    item_a = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[2]/div[2]/div/a')
                     video_src = item_a.get_property("href")
                     # driver.switch_to.default_content()
                 except Exception as e:
@@ -412,10 +412,10 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
                         driver.switch_to.window(window_first)              
                         driver.execute_script(f"document.getElementById('url').value = '{url}'")
                         sleep(2)
-                        driver.find_element_by_xpath('//*[@id="news"]/div[1]/fieldset/div[2]/form/li[2]/button').click()
+                        driver.find_element(By.XPATH,'//*[@id="news"]/div[1]/fieldset/div[2]/form/li[2]/button').click()
                         sleep(3)
                         driver.switch_to.window(window_first)
-                        item_source = driver.find_element_by_xpath('//*[@id="chakan"]')
+                        item_source = driver.find_element(By.XPATH,'//*[@id="chakan"]')
                         video_src = item_source.get_property('href')
                         print("备用网站下载成功了")
                 real_v_url = video_src.split("?")[0]
@@ -486,33 +486,33 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
                         print(e+"\nfailed url: "+url)
                     
                     #合并视频和音频
-                    import moviepy.editor
-                    start_time = datetime.now()
-                    file = title+"WIN"+".mp4"
-                    video = moviepy.editor.VideoFileClip(title+".mp4").set_fps(24)
-                    audio = moviepy.editor.AudioFileClip(title+".mp3")
-                    new_video = video.set_audio(audio)
-                    new_video.write_videofile(file)
-                    end_time = datetime.now()
-                    costed_time = (end_time-start_time).seconds
-                    # specify the dir to move downloaded video
-                    directory = os.getcwd()+"/uploading/"
-                    os.replace(os.getcwd()+"/"+file,directory+file)
-                    current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    print(f"""merge {title} -----> {file} 
-                    costed {costed_time} seconds, timestamp:{current_timestamp},
-                    xigua_url:{url},\nsearch_key:{main_key},mode:{running_mode}""")
-                    os.remove(title+".mp4")
-                    os.remove(title+".mp3")
-                    if not os.path.isfile('./uploading/'+file):
-                        with open('Failed_urls.txt','a') as f:
-                            f.write(datetime.now().strftime('%Y-%m-%d %H:%M:%S')+":"+title+"\n")
-                            f.write(url)
-                            f.write('\n')
-                    else:
-                        with open('previous.txt','a') as f:
-                            f.write(url)
-                            f.write('\n')
+                    # import moviepy.editor
+                    # start_time = datetime.now()
+                    # file = title+"WIN"+".mp4"
+                    # video = moviepy.editor.VideoFileClip(title+".mp4").set_fps(24)
+                    # audio = moviepy.editor.AudioFileClip(title+".mp3")
+                    # new_video = video.set_audio(audio)
+                    # new_video.write_videofile(file)
+                    # end_time = datetime.now()
+                    # costed_time = (end_time-start_time).seconds
+                    # # specify the dir to move downloaded video
+                    # directory = os.getcwd()+"/uploading/"
+                    # os.replace(os.getcwd()+"/"+file,directory+file)
+                    # current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    # print(f"""merge {title} -----> {file} 
+                    # costed {costed_time} seconds, timestamp:{current_timestamp},
+                    # xigua_url:{url},\nsearch_key:{main_key},mode:{running_mode}""")
+                    # os.remove(title+".mp4")
+                    # os.remove(title+".mp3")
+                    # if not os.path.isfile('./uploading/'+file):
+                    #     with open('Failed_urls.txt','a') as f:
+                    #         f.write(datetime.now().strftime('%Y-%m-%d %H:%M:%S')+":"+title+"\n")
+                    #         f.write(url)
+                    #         f.write('\n')
+                    # else:
+                    #     with open('previous.txt','a') as f:
+                    #         f.write(url)
+                    #         f.write('\n')
                 #merge in backend
                 # if video_url != "" and audio_url !="":
                 #     future_tasks.append(executor.submit(merge_video,url+"WATER六MELON"+title+"WATER六MELON"+main_key))
@@ -550,14 +550,14 @@ def douyin_search(driver, main_key):
     driver.get(dou_url)
     sleep(5)
     driver.switch_to.window(window_second)
-    items_a = driver.find_elements_by_tag_name('a')
+    items_a = driver.find_elements(By.TAG_NAME,'a')
     pattern = re.compile("https://www.douyin.com/video/[0-9]*$")
     for item in items_a:
         url = item.get_attribute("href")
         # print("在这里：", url)
         title = ''
         if url is not None and pattern.match(url):
-            divs = item.find_elements_by_tag_name('div')
+            divs = item.find_elements(By.TAG_NAME,'div')
             for div in divs:
                 texts = div.text
                 for text in texts.split('\n'):
@@ -576,7 +576,7 @@ def douyin_search(driver, main_key):
 # self parse xigua video
 def parseXigua(url, cookie):
     pc_headers={
-        "user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+        "user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
         "referer":url,
         "cookie":cookie
     }
@@ -681,8 +681,8 @@ if __name__ == "__main__":
     in_download_urls = set()
     try:
         # open display to avoid headless running
-        from pyvirtualdisplay import Display
-        disp = Display(visible=0, size=(1920,1080)).start()
+        # from pyvirtualdisplay import Display
+        # disp = Display(visible=0, size=(1920,1080)).start()
         chrome_options = uc.ChromeOptions()
         chrome_options.headless = False
         chrome_options.add_argument("--window-size=1920,1080")
@@ -696,8 +696,8 @@ if __name__ == "__main__":
         chrome_options.add_argument('--disable-dev-shm-usage')
         # settings for prod environment , specify port and browser
         chrome_options.add_argument('--remote-debugging-port=9222')
-        chrome_options.binary_location = "/usr/bin/chromium"
-        driver = uc.Chrome(executable_path="/usr/bin/chromedriver",options=chrome_options,version_main=95)
+        chrome_options.binary_location = "/snap/bin/chromium"
+        driver = uc.Chrome(executable_path="/usr/bin/chromedriver",options=chrome_options,version_main=126)
         # anti-crawlerdetection
         driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument",{
             "source":"""
@@ -742,7 +742,8 @@ if __name__ == "__main__":
             xigua_search(driver,k,v,previous_urls,in_download_urls,future_tasks,executor,running_mode)
             if running_mode in ['cold','mix']:
                 try:
-                    douyin_search(driver,k)
+                    # douyin_search(driver,k)
+                    pass
                 except Exception as douyin_error:
                     print("DOUYIN ERROR: ",douyin_error)
                 # print("do nothing in doyin***************************************************************")
@@ -765,4 +766,4 @@ if __name__ == "__main__":
         print(f"chrome total-running-time is {chrome_time} seconds")
         print("in_download_urls: "+str(in_download_urls))
         driver.quit()
-        disp.stop()
+        # disp.stop()
