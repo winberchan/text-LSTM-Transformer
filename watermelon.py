@@ -75,20 +75,21 @@ SEARCH_KEY_DICT={
 }
 # 常规热点 TOP 20
 SEARCH_KEY_DICT_SLOW={
-"倒闭":"","失业":"","负债":"","价格上涨":"",
-"厂 没订单":"","厂 关":"","厂 撤":"",
+"倒闭":"","我失业":"","我负债":"","原材料上涨":"",
 "找不到工作":"","欠薪":"","降薪":"","裁员":"",
-"冷清":"","闭店":"","停业":"",
-"房 断供":"","房 亏":"","空置":"",
-"银行 封":"","取不出钱":"","银行 限":"",
+"冷清":"","闭店":"","停业":"","破产":"",
+"我断供":"","写字楼空置":"","爆雷":"",
+"发不出工资":"",
 }
 # special keys, maximum to 66
 SEARCH_KEY_DICT_COLD={
 # 中国制造
-"比亚迪":"","华为":"","比亚迪 故障":"","华为 故障":"","小米 故障":"",
+"厂 没订单":"","厂 关":"","厂 撤":"",
+"比亚迪 故障":"","华为 故障":"","小米 故障":"",
 # 中国金融
-"A股暴跌":"","上证指数":"","割韭菜":"","政府拖欠":"","不能换美元":"","发不出工资":"",
-"破产":"","爆雷":"",
+"银行 封":"","我取不出钱":"","银行 限":"",
+"我股票亏了":"","投资 亏":"","我被割韭菜":"","政府拖欠":"","我不能换美元":"",
+
 }
 # FROZEN
 # #-------------------------------------------------------工厂外贸类
@@ -681,8 +682,8 @@ if __name__ == "__main__":
     in_download_urls = set()
     try:
         # open display to avoid headless running
-        # from pyvirtualdisplay import Display
-        # disp = Display(visible=0, size=(1920,1080)).start()
+        from pyvirtualdisplay import Display
+        disp = Display(visible=0, size=(1920,1080)).start()
         chrome_options = uc.ChromeOptions()
         chrome_options.headless = False
         chrome_options.add_argument("--window-size=1920,1080")
@@ -742,8 +743,8 @@ if __name__ == "__main__":
             xigua_search(driver,k,v,previous_urls,in_download_urls,future_tasks,executor,running_mode)
             if running_mode in ['cold','mix']:
                 try:
-                    # douyin_search(driver,k)
-                    pass
+                    douyin_search(driver,k)
+                    # pass
                 except Exception as douyin_error:
                     print("DOUYIN ERROR: ",douyin_error)
                 # print("do nothing in doyin***************************************************************")
@@ -766,4 +767,4 @@ if __name__ == "__main__":
         print(f"chrome total-running-time is {chrome_time} seconds")
         print("in_download_urls: "+str(in_download_urls))
         driver.quit()
-        # disp.stop()
+        disp.stop()
