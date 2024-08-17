@@ -1,8 +1,13 @@
+# using Keras 2
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
 import jieba
 jieba.load_userdict('user_dict.txt')
-from tensorflow.keras import models
+from tensorflow import keras
+import numpy as np
 import re
-model = models.load_model('text_model')
+model = keras.models.load_model('text_model')
 model.summary()
 
 # transfer chinise text to token style string

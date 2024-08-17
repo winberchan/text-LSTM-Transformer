@@ -1,3 +1,7 @@
+# using Keras 2
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
 import jieba
 jieba.load_userdict('user_dict.txt')
 import tensorflow as tf
@@ -6,11 +10,10 @@ import numpy as np
 import re
 import random
 
-BUFFER_SIZE = 8000
+BUFFER_SIZE = 10000
 BATCH_SIZE = 64
 VOCAB_SIZE = 5000
 SEQ_LENGTH = 20
-
 text_total_T = []
 text_total_F = []
 TEXT2TOKENSEQ_DICT = {}
@@ -46,8 +49,7 @@ dataset = dataset.shuffle(BUFFER_SIZE).shuffle(BUFFER_SIZE//10).shuffle(BUFFER_S
 train_dataset = dataset.take(4000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
 validate_dataset = dataset.skip(4000).take(1000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
 test_dataset = dataset.skip(5000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
-
-encoder = tf.keras.layers.experimental.preprocessing.TextVectorization(max_tokens = VOCAB_SIZE,output_mode = 'int',output_sequence_length=SEQ_LENGTH)
+encoder = tf.keras.layers.TextVectorization(max_tokens = VOCAB_SIZE,output_mode = 'int',output_sequence_length=SEQ_LENGTH)
 encoder.adapt(train_dataset.map(lambda text,_ : text))
 vocab = np.array(encoder.get_vocabulary())
 
@@ -75,9 +77,7 @@ model = tf.keras.Sequential([
 
 model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
               optimizer=tf.keras.optimizers.Adam(1e-4),metrics=['accuracy'])
-sample_text = ('外资 全走了 工厂 倒闭 没人 可以 上班 大家 在家 喝 西北风')
-predictions = model.predict(np.array([sample_text]))
-print('训练前模型预测样例得到归一化后的logits：',predictions[0])
+
 history = model.fit(train_dataset,epochs=25,validation_data=validate_dataset)
 model.summary()
 test_loss, test_acc = model.evaluate(test_dataset)
@@ -98,38 +98,6 @@ plt.ylim(None,1)
 plt.subplot(1,2,2)
 plot_graphs(history,'loss')
 plt.ylim(0, None)
-sample_text = ('共产党 真 伟大 我们 过上 小康 生活 我们 要 歌颂 祖国')
-sample_text1 = ('外资 全走了 工厂 倒闭 没人 可以 上班 大家 在家 喝 西北风')
-sample_text2 = ('惠州 三星 工厂 大裁员 操他妈了 没人 在 出租屋 整理 行李 滚回家 未来 没有 希望')
-predictions = model.predict(np.array([sample_text,sample_text1,sample_text2]))
-print("训练后模型预测结果",predictions)
+plt.pause(5)
+
 model.save('text_model')
-
-# def custom_standardize(input_data):
-#     print(input_data)
-#     return tf.strings.regex_replace(input_data, '\n', '')
-
-# def custom_split(input_data):
-#     # print(len(input_data.numpy()))
-#     word_list = []
-#     for text in input_data:
-#         # print(text)
-#         word_list += jieba.lcut(text)
-#     word_list = list(filter(lambda x : re.findall('[\u4e00-\u9fa5]', x),word_list))
-#     return word_list
-
-# encoder = tf.keras.layers.experimental.preprocessing.TextVectorization(standardize = custom_standardize,
-#                                                                      split = custom_split,
-#                                                                      max_tokens = VOCAB_SIZE,
-#                                                                      output_mode = 'int',
-#                                                                      output_sequence_length=SEQ_LENGTH)
-
-# jieba分词器测试
-# token_list = []
-# with open('f5.txt','r',encoding='utf-8') as file:
-#     for line in file:
-#         line = line.strip("\n")
-#         # print(line)
-#         word_list = jieba.lcut(line)
-#         print(word_list)
-# print("done")
