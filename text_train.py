@@ -13,7 +13,7 @@ import random
 BUFFER_SIZE = 10000
 BATCH_SIZE = 64
 VOCAB_SIZE = 5000
-SEQ_LENGTH = 20
+SEQ_LENGTH = 100
 text_total_T = []
 text_total_F = []
 TEXT2TOKENSEQ_DICT = {}
@@ -46,9 +46,9 @@ random.shuffle(text_total_F)
 dataset_F = tf.data.Dataset.from_tensor_slices((np.array(text_total_F),labels_F))
 dataset = dataset_T.concatenate(dataset_F)
 dataset = dataset.shuffle(BUFFER_SIZE).shuffle(BUFFER_SIZE//10).shuffle(BUFFER_SIZE//100)
-train_dataset = dataset.take(4000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
-validate_dataset = dataset.skip(4000).take(1000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
-test_dataset = dataset.skip(5000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+train_dataset = dataset.take(5000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+validate_dataset = dataset.skip(5000).take(1000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+test_dataset = dataset.skip(6000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
 encoder = tf.keras.layers.TextVectorization(max_tokens = VOCAB_SIZE,output_mode = 'int',output_sequence_length=SEQ_LENGTH)
 encoder.adapt(train_dataset.map(lambda text,_ : text))
 vocab = np.array(encoder.get_vocabulary())
