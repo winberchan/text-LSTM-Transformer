@@ -77,26 +77,26 @@ SEARCH_KEY_DICT={
 # 常规热点 TOP 20
 SEARCH_KEY_DICT_SLOW={
 # Elastic 7
-"我股票亏钱":"","我贷款炒股":"","A股割我韭菜":"","折叠机质量差":"","美领馆":"","浦东机场":"","火车站流浪汉":"",
+"我股票亏钱":"","我贷款炒股":"","A股割我韭菜":"","华为折叠机 差":"","美领馆":"","浦东机场":"","火车站流浪汉":"",
 # stable 13
 "倒闭":"","失业":"","负债":"","欠薪":"","降薪":"","裁员":"","冷清":"","生意 难":"",
-"外贸 难":"","实体难":"","电商 亏":"","闭店":"","停业":"",
+"实体难":"","电商 亏":"","闭店":"","停业":"","萧条":"",
 }
 # special keys, maximum to 66
 SEARCH_KEY_DICT_COLD={
 # 中国制造
 "厂 没订单":"","厂 关":"","厂 撤":"","厂 停":"","撤离中国":"",
-"义乌 没订单":"","富士康 撤":"","厂 没事做":"","厂 倒闭":"",
-"停工":"","停产":"","车间 停":"","返乡潮":"","废弃":"",
+"外贸 没订单":"","富士康 撤":"","厂 没事做":"","厂 倒闭":"",
+"停工":"","停产":"","车间 停":"","返乡潮":"","外贸 难":"",
 "惨淡":"实|城|镇|街|生意|车|市|场|店|商|地|货|行|厂|业",
-"荒废":"厦|城|镇|酒店|别墅群|宅|工业|科技|馆|厂|景|车",
-"华为质量差":"","比亚迪质量差":"",
+"华为质量差":"","比亚迪质量差":"","工厂停招":"",
+"北京倒闭":"","上海倒闭":"","深圳倒闭":"",
 # 中国金融
 "银行 封":"","我取不出钱":"","银行 限":"","爆雷":"","投资 亏":"",
-"发不出工资":"","破产":"","拖欠":"","涨价":"","集体维权":"","萧条":"",
-"我失业":"","我负债":"","房 亏":"","房 降":"","工资低":"","待业":"","停招":"",
-"房 断供":"","房 租不出":"","商铺空置":"","房 悔":"","写字楼空置":"","没收入":"",
-"北京失业":"","上海失业":"","北京倒闭":"","上海倒闭":"","找不到工作":"","找工作 难":"",
+"发不出工资":"","破产":"","拖欠":"","涨价":"","集体维权":"","开支大":"",
+"我失业":"","我负债":"","房 亏":"","工资低":"","待业":"","实拍":"","收入减少":"",
+"商铺空置":"","房 悔":"","写字楼空置":"","没收入":"","找不到工作":"","找工作 难":"",
+"北京工资低":"","上海工资低":"","深圳工资低":"","北京失业":"","上海失业":"","深圳失业":"",
 }
 # FROZEN
 # #-------------------------------------------------------工厂外贸类
@@ -553,7 +553,7 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
         driver.refresh()
 
 # search by key word
-def douyin_search(driver, main_key):
+def douyin_search(driver, main_key, previous_urls, in_download_urls):
     dou_url = "https://www.douyin.com/search/{}?publish_time=7&sort_type=2&source=tab_search&type=video".format(main_key)
     driver.get(dou_url)
     sleep(5)
@@ -571,7 +571,13 @@ def douyin_search(driver, main_key):
                 for text in texts.split('\n'):
                     if text and text[0] != '@' and len(text)>len(title):
                         title = text
-        if title != '' and not title[0].isdigit() and url not in in_download_urls:
+        if previous_urls is not None and url in previous_urls:
+            print(f"video {url} existed in previous set")
+            continue
+        elif url in in_download_urls:
+            print(f"video {url} 是重复搜索结果，忽略！")
+            continue
+        elif title != '' and not title[0].isdigit():
             with open('Shoted_urls.txt','a') as f:
                 f.write(datetime.now().strftime('%Y-%m-%d %H:%M:%S')+":"+title+"\n")
                 f.write(url)
@@ -750,7 +756,7 @@ if __name__ == "__main__":
             xigua_search(driver,k,v,previous_urls,in_download_urls,future_tasks,executor,running_mode)
             if running_mode in ['cold','mix']:
                 try:
-                    douyin_search(driver,k)
+                    douyin_search(driver, k, previous_urls, in_download_urls)
                     # pass
                 except Exception as douyin_error:
                     print("DOUYIN ERROR: ",douyin_error)
