@@ -29,8 +29,6 @@ with open('y1.txt','r',encoding='utf-8') as file:
         token_seq = text_preprocess(line)
         TEXT2TOKENSEQ_DICT[line]=token_seq
         text_total_T.append(token_seq)
-#正样本较少，采用过采样
-text_total_T = text_total_T*2
 labels_T = np.ones(len(text_total_T))
 random.shuffle(text_total_T)
 dataset_T = tf.data.Dataset.from_tensor_slices((np.array(text_total_T),labels_T))
@@ -47,8 +45,8 @@ dataset_F = tf.data.Dataset.from_tensor_slices((np.array(text_total_F),labels_F)
 dataset = dataset_T.concatenate(dataset_F)
 dataset = dataset.shuffle(BUFFER_SIZE).shuffle(BUFFER_SIZE//10).shuffle(BUFFER_SIZE//100)
 train_dataset = dataset.take(5000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
-validate_dataset = dataset.skip(5000).take(1000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
-test_dataset = dataset.skip(6000).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+validate_dataset = dataset.skip(5000).take(20).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+test_dataset = dataset.skip(5020).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
 encoder = tf.keras.layers.TextVectorization(max_tokens = VOCAB_SIZE,output_mode = 'int',output_sequence_length=SEQ_LENGTH)
 encoder.adapt(train_dataset.map(lambda text,_ : text))
 vocab = np.array(encoder.get_vocabulary())
@@ -98,6 +96,6 @@ plt.ylim(None,1)
 plt.subplot(1,2,2)
 plot_graphs(history,'loss')
 plt.ylim(0, None)
-plt.pause(5)
+# plt.pause(5)
 
 model.save('text_model')
