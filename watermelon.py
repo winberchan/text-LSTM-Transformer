@@ -78,16 +78,17 @@ SEARCH_KEY_DICT={
 # 常规热点 TOP 20
 SEARCH_KEY_DICT_SLOW={
 # Elastic 7
-"发不出工资":"","美领馆爆满":"","菜价 涨":"","电商 难":"","闭店":"",
+"发不出工资":"","英伟达":"","台积电":"","外资 撤":"","上海 没人":"","富士康 撤":"","比亚迪 坑":"",
 }
-# special keys, maximum to 40
+# special keys, maximum to 46
 SEARCH_KEY_DICT_COLD={
 # stable
-"倒闭":"","我失业":"","我负债":"","降薪":"","惨淡":"实|城|镇|街|生意|车|市|场|店|商|地|货|行|厂|业|餐",
-"厂 没订单":"","厂 关":"","厂 撤":"","厂 停":"","外贸没订单":"","欠薪":"","萧条":"","开支大":"","房 亏":"",
-"北京倒闭":"","上海倒闭":"","深圳倒闭":"","广州倒闭":"","义乌倒闭":"","东莞倒闭":"","厂 倒闭":"","讨薪":"",
-"工资低":"","我收入减少":"","我没收入":"","我找不到工作":"","找工作 难":"","冷清":"","破产":"","裁员":"",
+"倒闭":"","失业":"","负债":"","降薪":"","惨淡":"实|城|镇|街|生意|车|市|场|店|商|地|货|行|厂|业|餐","日结":"",
+"厂 没订单":"","厂 关":"","厂 撤":"","厂 停":"","外贸":"","欠薪":"","萧条":"","开支大":"","房 亏":"",
+"北京倒闭":"","上海倒闭":"","深圳倒闭":"","广州倒闭":"","厂 搬越南":"","东莞倒闭":"","厂 倒闭":"","讨薪":"",
+"工资低":"","我收入减少":"","我没收入":"","找不到工作":"","找工作 难":"","冷清":"","破产":"","裁员":"",
 "银行 限":"","北京工资低":"","上海工资低":"","深圳工资低":"","北京失业":"","上海失业":"","深圳失业":"",
+"空置":"","接不到订单":"","现状":"","停产":"","工人维权":"","我失业":"","我负债":"","我没工作":"",
 }
 # FROZEN
 # #-------------------------------------------------------工厂外贸类
@@ -686,8 +687,8 @@ if __name__ == "__main__":
     in_download_urls = set()
     try:
         # open display to avoid headless running
-        from pyvirtualdisplay import Display
-        disp = Display(visible=0, size=(1920,1080)).start()
+        # from pyvirtualdisplay import Display
+        # disp = Display(visible=0, size=(1920,1080)).start()
         chrome_options = uc.ChromeOptions()
         chrome_options.headless = False
         chrome_options.add_argument("--window-size=1920,1080")
@@ -702,7 +703,7 @@ if __name__ == "__main__":
         # settings for prod environment , specify port and browser
         chrome_options.add_argument('--remote-debugging-port=9222')
         chrome_options.binary_location = "/snap/bin/chromium"
-        driver = uc.Chrome(executable_path="/usr/bin/chromedriver",options=chrome_options,version_main=130)
+        driver = uc.Chrome(executable_path="/usr/bin/chromedriver",options=chrome_options,version_main=132)
         # anti-crawlerdetection
         driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument",{
             "source":"""
@@ -744,11 +745,13 @@ if __name__ == "__main__":
             # if key_counter%5 == 0:
             #     clear_cache(driver)
             print(f"PROCESS THE {key_counter}th KEY: " + k)
-            xigua_search(driver,k,v,previous_urls,in_download_urls,future_tasks,executor,running_mode)
+            # 西瓜
+            # xigua_search(driver,k,v,previous_urls,in_download_urls,future_tasks,executor,running_mode)
+            # 抖音
             if running_mode in ['cold','mix']:
                 try:
                     douyin_search(driver, k, previous_urls, in_download_urls)
-                    # pass
+                    pass
                 except Exception as douyin_error:
                     print("DOUYIN ERROR: ",douyin_error)
                 # print("do nothing in doyin***************************************************************")
@@ -771,4 +774,4 @@ if __name__ == "__main__":
         print(f"chrome total-running-time is {chrome_time} seconds")
         print("in_download_urls: "+str(in_download_urls))
         driver.quit()
-        disp.stop()
+        # disp.stop()
