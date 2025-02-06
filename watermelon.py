@@ -78,7 +78,7 @@ SEARCH_KEY_DICT={
 # 常规热点 TOP 20
 SEARCH_KEY_DICT_SLOW={
 # Elastic 7
-"发不出工资":"","英伟达":"","台积电":"","外资 撤":"","上海 没人":"","富士康 撤":"","比亚迪 坑":"",
+"英伟达":"","台积电":"","外资 撤":"","上海 没人":"","富士康 撤":"","比亚迪 坑":"","发不出工资":"",
 }
 # special keys, maximum to 46
 SEARCH_KEY_DICT_COLD={
@@ -545,11 +545,34 @@ def xigua_search(driver, main_key, sub_keys, previous_urls, in_download_urls, fu
         driver.refresh()
 
 # search by key word
-def douyin_search(driver, main_key, previous_urls, in_download_urls):
-    dou_url = "https://www.douyin.com/search/{}?publish_time=7&sort_type=2&source=tab_search&type=video".format(main_key)
-    driver.get(dou_url)
+def douyin_search(driver, main_key, previous_urls, in_download_urls, cookies):
+    if main_key =="英伟达":
+        driver.get("https://www.douyin.com")
+        driver.implicitly_wait(10)
+        driver.delete_all_cookies()
+        for cookie in cookies:
+            if 'expiry' in cookie:
+                del cookie["expiry"]
+            print(cookie)
+            driver.add_cookie(cookie)
+        sleep(10)
+        driver.refresh()
+    input_box = driver.find_element(By.TAG_NAME,'input')
+    input_box.clear()
+    input_box.send_keys(main_key)
+    driver.find_element(By.TAG_NAME,'button').click()
+    # click video category
+    driver.find_element(By.XPATH, '//*[@id="search-content-area"]/div/div[1]/div[1]/div[1]/div/div/span[2]').click()
+    # click filter newest button
+    filter_BTN = driver.find_element(By.XPATH,'//*[@id="search-content-area"]/div/div[1]/div[1]/div[1]/div/div/div/span')
+    filter_BTN.click()
+    
+    # this access way has been blocked by verify code
+    # dou_url = "https://www.douyin.com/search/{}?publish_time=7&sort_type=2&source=tab_search&type=video".format(main_key)  
+    # driver.get(dou_url)
     sleep(5)
-    driver.switch_to.window(window_second)
+
+    # driver.switch_to.window(window_second)
     items_a = driver.find_elements(By.TAG_NAME,'a')
     pattern = re.compile("https://www.douyin.com/video/[0-9]*$")
     for item in items_a:
@@ -702,6 +725,8 @@ if __name__ == "__main__":
         chrome_options.add_argument('--disable-dev-shm-usage')
         # settings for prod environment , specify port and browser
         chrome_options.add_argument('--remote-debugging-port=9222')
+        # stop pop-up window
+        chrome_options.add_argument("--disable-notifications")
         chrome_options.binary_location = "/snap/bin/chromium"
         driver = uc.Chrome(executable_path="/usr/bin/chromedriver",options=chrome_options,version_main=132)
         # anti-crawlerdetection
@@ -715,11 +740,11 @@ if __name__ == "__main__":
         driver.set_page_load_timeout(518) 
         driver.implicitly_wait(15)
         # open ixigua front page
-        driver.get('https://www.ixigua.com')
+        # driver.get('https://www.ixigua.com')
         # execute by 
         # disp = Display(visible=0, size=(1920,1080)).start()multi-thread
         executor = ThreadPoolExecutor(max_workers=3)
-        future_tasks = []
+        # future_tasks = []
         if running_mode == 'slow':
             SEARCH_KEY_DICT = SEARCH_KEY_DICT_SLOW
         elif running_mode == 'mix':
@@ -745,19 +770,22 @@ if __name__ == "__main__":
             # if key_counter%5 == 0:
             #     clear_cache(driver)
             print(f"PROCESS THE {key_counter}th KEY: " + k)
-            # 西瓜
+            # 西瓜  Gave up ixigua.com because all content migrant to douyin.com
             # xigua_search(driver,k,v,previous_urls,in_download_urls,future_tasks,executor,running_mode)
             # 抖音
+            # load cookies
+            f = open("douyin_cookie.txt")
+            cookies = json.loads(f.read())
             if running_mode in ['cold','mix']:
                 try:
-                    douyin_search(driver, k, previous_urls, in_download_urls)
-                    pass
+                    douyin_search(driver, k, previous_urls, in_download_urls, cookies)
+                    # pass
                 except Exception as douyin_error:
                     print("DOUYIN ERROR: ",douyin_error)
                 # print("do nothing in doyin***************************************************************")
             key_counter = key_counter+1
-        print(future_tasks)
-        wait(future_tasks,return_when=ALL_COMPLETED)
+        # print(future_tasks)
+        # wait(future_tasks,return_when=ALL_COMPLETED)
     except Exception as e:
         print("serious error occured:")
         print(e)
